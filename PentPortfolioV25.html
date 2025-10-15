@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viktor Parisot - Craft the Contrast</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+
+        :root {
+            --background-color: #ffffff;
+            --text-color: #1a1a1a;
+            --dark-bg: #111111;
+            --light-text: #f0f0f0;
+            --header-height: 80px;
+            --transition-speed: 0.6s;
+            --timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        /* Lock body scroll when mobile menu is open */
+        body.mobile-nav-open {
+            overflow: hidden;
+        }
+
+        .container { max-width: 100%; margin: 0 auto; padding: 0 40px; }
+        .full-width-container { width: 100%; }
+
+        /* Header */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background: rgba(25, 25, 25, 0); /* Initially transparent */
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0);
+            transition: background-color 0.5s ease, backdrop-filter 0.5s ease, border-color 0.5s ease;
+        }
+
+        /* Scrolled state for the header */
+        .main-header.scrolled {
+            background: rgba(25, 25, 25, 0.5); /* Glassy background */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .main-header a { color: #fff; text-decoration: none; font-weight: 500; transition: opacity 0.3s ease; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .main-header a:hover { opacity: 0.7; }
+        .site-title { font-weight: 700; font-size: 1.5rem; z-index: 2001; }
+
+        /* === START: MOBILE NAVIGATION ENHANCEMENTS === */
+        .hamburger-menu {
+            display: none; /* Hidden on desktop */
+            width: 30px;
+            height: 22px;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: pointer;
+            z-index: 2001; /* Position above nav background */
+            position: relative;
+        }
+        .hamburger-menu span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: #fff;
+            border-radius: 3px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .main-nav {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .main-nav ul { list-style: none; display: flex; gap: 30px; }
+        /* === END: MOBILE NAVIGATION ENHANCEMENTS === */
+
+        /* Hero Section */
+        .hero { 
+            height: 100vh; 
+            position: relative;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            text-align: center; 
+            color: #fff; 
+            overflow: hidden;
+        }
+        .hero-background {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: scale(1);
+        }
+        .hero-background.active {
+            opacity: 1;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.2));
+            z-index: 1;
+        }
+        .hero-content { 
+            opacity: 0; 
+            transform: translateY(30px); 
+            animation: fadeInUp 0.8s 0.3s ease-out forwards; 
+            position: relative;
+            z-index: 2;
+            width: 90%; /* Prevent text from touching edges on small screens */
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+        .hero h1 { 
+            font-family: 'Inter', sans-serif; 
+            font-size: clamp(3rem, 8vw, 7rem); 
+            margin-bottom: 1rem; 
+            text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+            font-weight: 700;
+        }
+        .hero .slogan { 
+            font-size: clamp(1rem, 3vw, 1.5rem); 
+            margin-bottom: 2rem; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .interactive-tagline-container { 
+            background: rgba(0,0,0,0.5); 
+            padding: 10px 25px; 
+            border-radius: 30px; 
+            display: inline-flex; 
+            align-items: center; 
+            backdrop-filter: blur(5px); 
+            transition: width 0.6s var(--timing-function); 
+        }
+        .interactive-tagline .verb-wrapper {
+            position: relative;
+            display: inline-block;
+            text-align: center;
+            transition: width 0.6s var(--timing-function);
+        }
+        .interactive-tagline .verb { 
+            font-weight: 700; 
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .interactive-tagline .verb.active {
+            opacity: 1;
+        }
+
+        .hero-project-info {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            z-index: 2;
+            text-align: left;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .hero-project-info.active {
+            opacity: 1;
+        }
+        .hero-project-info h3 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        .hero-project-info p {
+            font-size: 1rem;
+            max-width: 300px;
+        }
+        .hero-project-info a {
+            color: #fff;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        .hero-project-info a:hover {
+            opacity: 0.7;
+        }
+
+        /* === START: INTRO PRESENTATION SECTION REWORK === */
+        .intro-statement-section {
+            padding: 120px 40px;
+            background-color: #f8f8f8;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            display: flex;
+            justify-content: center;
+        }
+        .intro-statement-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .intro-content-wrapper {
+            max-width: 900px;
+            width: 100%;
+        }
+        .intro-heading {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #888;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        .intro-statement-text {
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(1.3rem, 2.5vw, 1.6rem);
+            line-height: 1.6;
+            color: var(--text-color);
+            text-align: justify;
+        }
+        /* === END: INTRO PRESENTATION SECTION REWORK === */
+
+
+        /* Portfolio Sections General */
+        .section-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: clamp(2.5rem, 5vw, 4rem); text-align: center; margin-bottom: 80px; }
+        
+        /* === START: SCROLLING GALLERY CHANGES === */
+        .scrolling-gallery-section {
+            background-color: var(--dark-bg);
+            padding: 100px 0;
+            position: relative;
+        }
+        .scrolling-gallery-section .section-title {
+            color: var(--light-text);
+        }
+        .portfolio-gallery-wrapper { 
+            overflow-x: auto; 
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch; 
+            scrollbar-width: none;
+            scroll-behavior: smooth; 
+            /* Sizing for two items */
+            max-width: 1240px; /* (580px * 2) + 80px gap -> adjusted for padding */
+            margin: 0 auto;
+            padding: 10px 0; /* Removed side padding to control width exactly */
+        }
+        .portfolio-gallery-wrapper::-webkit-scrollbar { display: none; }
+        .portfolio-grid-scrolling { 
+            display: flex; 
+            flex-wrap: nowrap; 
+            gap: 80px; /* Increased gap */
+            padding: 0 40px; /* Padding for start/end spacing */
+            width: max-content; /* Ensure grid expands */
+        }
+
+        .scrolling-gallery-section .portfolio-item { 
+            position: relative; 
+            width: 500px; /* New width */
+            flex-shrink: 0; 
+            text-decoration: none; 
+            color: inherit; 
+            display: block; 
+            opacity: 0; 
+            transform: translateY(50px); 
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
+            scroll-snap-align: start;
+        }
+        /* Snap to every second item */
+        .scrolling-gallery-section .portfolio-item:nth-child(odd) {
+             scroll-snap-align: start;
+        }
+        .scrolling-gallery-section .portfolio-item:nth-child(even) {
+             scroll-snap-align: none;
+        }
+
+        .scrolling-gallery-section .portfolio-item.is-visible { opacity: 1; transform: translateY(0); }
+        .scrolling-gallery-section .portfolio-item img { 
+            width: 100%; 
+            height: 380px; /* New height for landscape feel */
+            object-fit: cover; 
+            display: block; 
+        }
+        .scrolling-gallery-section .portfolio-item-info { padding-top: 20px; }
+        .scrolling-gallery-section .portfolio-item-info h4 { font-size: 1.5rem; font-family: 'Inter', sans-serif; font-weight: 700; color: var(--light-text); }
+        .scrolling-gallery-section .portfolio-item-info p { color: #aaa; }
+
+        .scroll-arrow {
+            position: absolute;
+            top: 45%; /* Adjusted vertical position */
+            transform: translateY(-50%);
+            z-index: 10;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scroll-arrow:hover { background: rgba(255,255,255,0.2); }
+        .scroll-arrow.left { left: calc(50% - 620px - 40px); } /* Position outside the container */
+        .scroll-arrow.right { right: calc(50% - 620px - 40px); } /* Position outside the container */
+        .scroll-arrow svg { stroke: white; width: 24px; height: 24px; }
+        /* === END: SCROLLING GALLERY CHANGES === */
+
+        /* Static Poster Gallery Section */
+        .static-gallery-section {
+            padding: 120px 40px;
+            background-color: var(--background-color);
+        }
+        .static-gallery {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px 80px;
+        }
+        .static-gallery .portfolio-item {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        .static-gallery .portfolio-item img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            display: block;
+        }
+        .static-gallery .portfolio-item-info h4 {
+            font-size: 1.5rem;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .static-gallery .portfolio-item-info p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* === START: PROJECT DETAIL VIEW REWORK === */
+        .project-detail-view { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(253, 253, 253, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 3000; overflow-y: auto; 
+            cursor: pointer;
+            display: block; opacity: 0; visibility: hidden;
+            transition: opacity var(--transition-speed) var(--timing-function), visibility 0s var(--transition-speed); 
+        }
+        .project-detail-view.active { 
+            opacity: 1; 
+            visibility: visible;
+            transition-delay: 0s;
+        }
+        .project-detail-view .project-detail-content {
+            opacity: 0;
+            transform: scale(0.98);
+            transition: opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s;
+            cursor: auto;
+        }
+        .project-detail-view.active .project-detail-content {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .close-project { position: fixed; top: 25px; right: 40px; font-size: 2.5rem; cursor: pointer; z-index: 3001; text-decoration: none; color: var(--text-color); transition: transform 0.3s ease; }
+        .close-project:hover { transform: scale(1.1); }
+        
+        .project-detail-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 60px;
+        }
+        .project-info {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        .project-info h2 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 25px;
+        }
+        .project-info .meta {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .project-info .meta p {
+            margin-bottom: 0;
+            background-color: #eee;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #555;
+            display: inline-block;
+        }
+        .project-info .meta p span {
+            color: #555;
+        }
+        .project-info .description p {
+            text-align: center;
+            line-height: 1.7;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .project-media {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 60px;
+        }
+        .project-media figure {
+            margin: 0;
+        }
+        .project-media img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        .project-media figcaption {
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        /* === END: PROJECT DETAIL VIEW REWORK === */
+
+
+        /* Dark Footer */
+        .dark-footer { background-color: var(--dark-bg); color: var(--light-text); padding: 100px 0 40px 0; }
+        
+        /* Brand Carousel */
+        .brands-section { padding: 0 40px 80px; }
+        .brands-section h3 { text-align: center; color: #aaa; font-size: 1.1rem; margin-bottom: 40px; }
+        .brand-carousel { overflow: hidden; white-space: nowrap; position: relative; }
+        .brand-carousel::before, .brand-carousel::after { content: ''; position: absolute; top: 0; width: 100px; height: 100%; z-index: 2; }
+        .brand-carousel::before { left: 0; background: linear-gradient(to right, var(--dark-bg), transparent); }
+        .brand-carousel::after { right: 0; background: linear-gradient(to left, var(--dark-bg), transparent); }
+        .brand-track { display: inline-block; animation: scroll 40s linear infinite; }
+        .brand-item { display: inline-block; font-size: 1.5rem; margin: 0 40px; color: #aaa; }
+        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .footer-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 30px; border-bottom: 1px solid #444; padding-bottom: 60px; margin-bottom: 60px; }
+        .footer-column { grid-column: span 6; }
+        .footer-column.title { grid-column: 1 / span 3; font-size: 1.1rem; color: #aaa; }
+        .footer-column.title p { margin: 0; }
+        .footer-column.content { grid-column: 4 / span 9; }
+        .footer-column.content p { text-align: justify; }
+        .footer-column.contact-details { grid-column: 4 / span 4; }
+        .footer-column a { color: var(--light-text); text-decoration: none; transition: opacity 0.3s; }
+        .footer-column a:hover { opacity: 0.7; }
+
+        /* Specific alignment for the Experience section title */
+        .experience-grid .footer-column.title {
+            padding-top: 20px;
+        }
+        
+        /* Experience Timeline & Certificates */
+        .experience-timeline .timeline-item {
+            border-bottom: 1px solid #444;
+            padding: 20px 0;
+            display: grid; 
+            grid-template-rows: auto 0fr; 
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        .experience-timeline .timeline-item.active {
+            grid-template-rows: auto 1fr; 
+        }
+        .experience-timeline .timeline-item:last-child { border-bottom: none; }
+        .timeline-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .timeline-header h5 { font-size: 1.2rem; font-weight: 500; color: var(--light-text); margin: 0; }
+        .timeline-header span { color: #888; }
+        .timeline-body {
+            overflow: hidden;
+            opacity: 0; 
+            transition: opacity 0.3s ease-in-out 0.1s; 
+        }
+        .timeline-item.active .timeline-body {
+            opacity: 1; 
+        }
+        .timeline-body p {
+            color: #aaa;
+            font-size: 1rem;
+            line-height: 1.7;
+            text-align: justify;
+            margin: 0;
+            padding-top: 15px;
+        }
+        .certificates-list p { font-size: 1.2rem; line-height: 1.7; margin-bottom: 5px; }
+        
+        /* Contact Form */
+        #contact-form { display: flex; flex-direction: column; gap: 20px; }
+        #contact-form .form-row { display: flex; gap: 20px; }
+        #contact-form input,
+        #contact-form textarea {
+            width: 100%;
+            background-color: #222;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Inter', sans-serif;
+            color: var(--light-text);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        #contact-form input::placeholder,
+        #contact-form textarea::placeholder { color: #888; }
+        #contact-form input:focus,
+        #contact-form textarea:focus { outline: none; border-color: var(--light-text); }
+        #contact-form .submit-btn {
+            align-self: flex-start;
+            padding: 12px 30px;
+            background-color: var(--light-text);
+            color: var(--dark-bg);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: opacity 0.3s ease;
+        }
+        #contact-form .submit-btn:hover { opacity: 0.8; }
+        #contact-form .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        #form-status { margin-top: -10px; font-size: 0.9rem; font-weight: 500; height: 1em; }
+
+        .footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #888; }
+        .footer-bottom a { color: #888; text-decoration: none; margin-left: 20px; }
+
+        @media (max-width: 1400px) {
+            .scroll-arrow.left { left: 20px; }
+            .scroll-arrow.right { right: 20px; }
+        }
+
+        @media (max-width: 900px) {
+            .footer-grid { display: flex; flex-direction: column; }
+            .hero-project-info { left: 20px; bottom: 20px; max-width: calc(100% - 40px); }
+            .static-gallery { grid-template-columns: 1fr; gap: 60px; }
+            #contact-form .form-row { flex-direction: column; }
+            .experience-grid .footer-column.title { padding-top: 0; }
+            .portfolio-gallery-wrapper {
+                scroll-snap-type: none; /* Disable snap on mobile for better touch scrolling */
+            }
+            .scrolling-gallery-section .portfolio-item {
+                width: 70vw; /* Adjust item width for mobile */
+            }
+        }
+
+        /* === START: ENHANCED MOBILE STYLES (768px and below) === */
+        @media (max-width: 768px) {
+            .container, .static-gallery-section {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            /* === START: HEADER & MENU REMOVAL FOR MOBILE === */
+            .main-header {
+                display: none;
+            }
+            /* === END: HEADER & MENU REMOVAL FOR MOBILE === */
+
+
+            /* Hero Section Mobile Font Adjustments */
+            .hero h1 {
+                font-size: clamp(2.5rem, 13vw, 3.5rem); 
+            }
+            .hero .slogan {
+                font-size: clamp(0.9rem, 4vw, 1.1rem);
+            }
+            .interactive-tagline {
+                font-size: 0.95rem;
+            }
+            /* Hero Project Info Mobile Font Adjustment */
+            .hero-project-info h3 { 
+                font-size: 1.3rem; 
+            }
+            .hero-project-info p { 
+                font-size: 0.85rem; 
+            }
+            
+            /* General Section Title Font Adjustment */
+            .section-title {
+                font-size: clamp(2.2rem, 9vw, 3rem);
+                margin-bottom: 60px;
+            }
+
+            /* === START: INTRO PRESENTATION MOBILE STYLES === */
+            .intro-statement-section {
+                padding: 80px 20px;
+            }
+            .intro-heading {
+                text-align: center;
+            }
+            .intro-statement-text {
+                font-size: clamp(1.1rem, 4.5vw, 1.3rem);
+                text-align: left;
+            }
+            /* === END: INTRO PRESENTATION MOBILE STYLES === */
+
+            /* Hide Scroll Arrows on Mobile */
+            .scroll-arrow {
+                display: none;
+            }
+            
+            .scrolling-gallery-section { padding: 80px 0; }
+            .portfolio-grid-scrolling { padding: 0 20px; gap: 40px; }
+            .scrolling-gallery-section .portfolio-item { width: 75vw; }
+            .scrolling-gallery-section .portfolio-item img { height: 280px; }
+            .scrolling-gallery-section .portfolio-item-info h4 { font-size: 1.2rem; }
+            .scrolling-gallery-section .portfolio-item-info p { font-size: 0.9rem; }
+
+
+            /* Static Gallery Mobile Adjustments */
+            .static-gallery-section { padding: 80px 20px; }
+            .static-gallery { gap: 50px; }
+            .static-gallery .portfolio-item-info h4 { font-size: 1.2rem; }
+            .static-gallery .portfolio-item-info p { font-size: 0.9rem; }
+
+            /* Project Detail Mobile Adjustments */
+            .project-detail-content {
+                padding: 100px 20px;
+                gap: 40px;
+            }
+            .project-info h2 {
+                 font-size: clamp(2rem, 8vw, 2.5rem);
+            }
+            .project-info .description p { font-size: 1rem; }
+            .close-project {
+                top: 20px;
+                right: 20px;
+                font-size: 2.2rem;
+            }
+
+            /* About/Footer Section Mobile Font Adjustments */
+            .dark-footer { padding-top: 80px; }
+            .brands-section { padding: 0 0 60px 0; }
+            .brand-item { font-size: 1.2rem; }
+            .footer-grid {
+                padding-bottom: 40px;
+                margin-bottom: 40px;
+                gap: 20px;
+            }
+            .footer-column.title {
+                 margin-bottom: 10px;
+                 color: #fff;
+                 font-weight: 500;
+                 font-size: 1rem;
+            }
+             .footer-column.content p { 
+                font-size: 0.9rem; 
+            }
+
+            /* === START: MOBILE EXPERIENCE TITLE FIX === */
+            .timeline-header {
+                align-items: flex-start;
+                gap: 15px;
+            }
+            .timeline-header h5 {
+                flex: 1;
+                font-size: 1rem; 
+            }
+            .timeline-header span {
+                flex-shrink: 0;
+                font-size: 0.9rem;
+            }
+            /* === END: MOBILE EXPERIENCE TITLE FIX === */
+
+            .timeline-body p { 
+                font-size: 0.9rem; 
+            }
+            /* === START: MOBILE CERTIFICATE TEXT FIX === */
+            .certificates-list p { 
+                font-size: 1rem; 
+                text-align: left; /* Ensure text is not justified */
+            }
+            /* === END: MOBILE CERTIFICATE TEXT FIX === */
+
+            .footer-column.contact-details { grid-column: span 12; }
+            
+            .footer-bottom {
+                flex-direction: column; /* Stack copyright and links */
+                gap: 15px;
+                text-align: center;
+            }
+            .footer-bottom div {
+                display: flex;
+                gap: 25px;
+                justify-content: center;
+            }
+             .footer-bottom a { margin-left: 0; }
+        }
+        /* === END: ENHANCED MOBILE STYLES === */
+
+        /* === START: DESKTOP SCROLL ARROW REFINEMENTS === */
+        @media (min-width: 901px) {
+            .scrolling-gallery-section .scroll-arrow {
+                background: transparent;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                border: none;
+                border-radius: 0;
+                width: 60px;
+                height: 60px;
+                top: 57%; /* Lowered the position */
+                transform: translateY(-50%);
+                transition: opacity 0.3s ease;
+                opacity: 0.7;
+            }
+
+            .scrolling-gallery-section .scroll-arrow.left {
+                left: calc(50% - 620px - 50px);
+            }
+
+            .scrolling-gallery-section .scroll-arrow.right {
+                right: calc(50% - 620px - 50px);
+            }
+            
+            .scrolling-gallery-section .scroll-arrow svg {
+                stroke: #aaa;
+                transition: stroke 0.3s ease;
+                width: 32px;
+                height: 32px;
+            }
+            
+            .scrolling-gallery-section .scroll-arrow:hover {
+                background: transparent;
+                opacity: 1;
+            }
+
+            .scrolling-gallery-section .scroll-arrow:hover svg {
+                stroke: #fff;
+            }
+        }
+        /* === END: DESKTOP SCROLL ARROW REFINEMENTS === */
+    </style>
+</head>
+<body>
+
+    <header class="main-header">
+        <a href="#" class="site-title">Viktor Parisot</a>
+        <!-- START: HAMBURGER MENU ICON -->
+        <div class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <!-- END: HAMBURGER MENU ICON -->
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#portfolio">Work</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div id="hero-bg-container"></div>
+            <div class="hero-content">
+                <h1>Viktor Parisot</h1>
+                <p class="slogan">Craft the Contrast</p>
+                <div class="interactive-tagline-container">
+                    <p class="interactive-tagline">I can <span class="verb-wrapper"><span class="verb active">Design</span></span> Your Ideas</p>
+                </div>
+            </div>
+            <div id="hero-project-info-container"></div>
+        </section>
+
+        <!-- === START: NEW INTRO PRESENTATION SECTION === -->
+        <section class="intro-statement-section">
+            <div class="intro-content-wrapper">
+                <h3 class="intro-heading">My Philosophy</h3>
+                <p class="intro-statement-text">
+                    I’m a creative communication student at ISCOM Paris. I believe that brands have the power to inspire and connect deeply with people. By combining strategic thinking with hands-on experience—from startups to global companies like Microsoft—I bring ideas to life through compelling visual identities and brand strategies.
+                </p>
+                <p style="text-align: left; max-width: 100%; margin: 30px 0 0; font-style: italic; color: #555; font-size: 0.9rem;">This portfolio showcases fictional proof-of-concept projects created to simulate real-world design and creative challenges.</p>
+            </div>
+        </section>
+        <!-- === END: NEW INTRO PRESENTATION SECTION === -->
+
+        <section id="portfolio" class="scrolling-gallery-section">
+            <h2 class="section-title">Selected Works</h2>
+            <button class="scroll-arrow left">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <div class="portfolio-gallery-wrapper">
+                <div class="portfolio-grid-scrolling">
+                    <a href="#" class="portfolio-item" data-project-id="0">
+                        <img src="https://i.postimg.cc/fL46JB7D/WIPweb.png" alt="Project 1">
+                        <div class="portfolio-item-info"><h4>Project 1</h4><p>Work in Progress</p></div>
+                    </a>
+                    <a href="#" class="portfolio-item" data-project-id="1">
+                        <img src="https://i.postimg.cc/Kj9nhcm1/FTypeApp.png" alt="FlareSightX Logo Creation">
+                        <div class="portfolio-item-info"><h4>FlareSightX Logo Creation</h4><p>Logo Design</p></div>
+                    </a>
+                    <a href="#" class="portfolio-item" data-project-id="2">
+                        <img src="https://i.postimg.cc/fL46JB7D/WIPweb.png" alt="Project 2">
+                        <div class="portfolio-item-info"><h4>Project 2</h4><p>Work in Progress</p></div>
+                    </a>
+                    <a href="#" class="portfolio-item" data-project-id="3">
+                        <img src="https://i.postimg.cc/fL46JB7D/WIPweb.png" alt="Project 3">
+                        <div class="portfolio-item-info"><h4>Project 3</h4><p>Work in Progress</p></div>
+                    </a>
+                </div>
+            </div>
+            <button class="scroll-arrow right">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+        </section>
+
+        <section class="static-gallery-section">
+             <div class="static-gallery">
+                <a href="#" class="portfolio-item" data-project-id="5">
+                    <img src="https://i.postimg.cc/j28zYqRj/Luftwerk-Paper.png" alt="LuftWerk Rebranding">
+                    <div class="portfolio-item-info"><h4>LuftWerk Rebranding</h4><p>Logo redesign for an innovative German AI-driven AVAC systems company.</p></div>
+                </a>
+                <a href="#" class="portfolio-item" data-project-id="6">
+                    <img src="https://i.postimg.cc/fL46JB7D/WIPweb.png" alt="Project 4">
+                    <div class="portfolio-item-info"><h4>Project 4</h4><p>This project is currently being updated.</p></div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <footer id="about" class="dark-footer">
+        <div class="container">
+            <div class="brands-section">
+                <h3 class="section-subtitle">Brand Collaborations</h3>
+                <div class="brand-carousel">
+                    <div class="brand-track">
+                        <div class="brand-item">Monoprix</div><div class="brand-item">Théâtre du Châtelet</div><div class="brand-item">Calzedonia</div>
+                        <div class="brand-item">Ancrée Caviar</div><div class="brand-item">Éléphant®</div><div class="brand-item">RCG Coeur et Art</div><div class="brand-item">Réseau Vrac & Réemploi</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-grid experience-grid">
+                <div class="footer-column title"><p>Professional Experience</p></div>
+                <div class="footer-column content">
+                    <div class="experience-timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-header">
+                                <h5>Communication Strategy Intern at Placeàlouer</h5>
+                                <span>2024</span>
+                            </div>
+                            <div class="timeline-body">
+                                <p>Shaped the startup’s voice through content creation (social media, newsletters), brand positioning, and UX improvements.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-header">
+                                <h5>Event & Communication Assistant at CPAM du Val-d’Oise</h5>
+                                <span>2023</span>
+                            </div>
+                            <div class="timeline-body">
+                                <p>Managed a full team-building seminar and Open House event from concept to execution. Produced video content for internal and external audiences.</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-header">
+                                <h5>Discovery Intern at Microsoft</h5>
+                                <span>2022</span>
+                            </div>
+                            <div class="timeline-body">
+                                <p>Contributed to an app concept for job seekers and assisted with corporate event coordination.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-grid">
+                <div class="footer-column title"><p>Certificates</p></div>
+                <div class="footer-column content certificates-list">
+                    <p>Photoshop-Illustrator-InDesign Powercombo for Design</p>
+                    <p>Creating Presets, LUTs, and Profiles for Photography</p>
+                    <p>AI-Driven Product Designer</p>
+                </div>
+            </div>
+
+            <div class="footer-grid">
+                <div class="footer-column title"><p>About</p></div>
+                <div class="footer-column content"><p>Guided by curiosity and intellect, I create work that redefines ideas and shifts perceptions. My focus is on minimalist, modern aesthetics with a purpose.</p></div>
+            </div>
+
+             <div class="footer-grid">
+                <div class="footer-column title"><p>Get In Touch</p></div>
+                <div class="footer-column contact-details">
+                    <p><a href="mailto:viktor.parisot@icloud.com">viktor.parisot@icloud.com</a></p>
+                    <p><a href="tel:+33674788783">+33 6 74 78 87 83</a></p>
+                </div>
+                 <div class="footer-column contact-details"><p>Île-de-France</p></div>
+            </div>
+            
+            <div class="footer-grid">
+                <div class="footer-column title"><p>Send a Message</p></div>
+                <div class="footer-column content">
+                    <form id="contact-form">
+                        <div class="form-row">
+                            <input type="text" id="user_name" name="user_name" placeholder="Your Name" required>
+                            <input type="email" id="user_email" name="user_email" placeholder="Your Email" required>
+                        </div>
+                        <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+                        <button type="submit" class="submit-btn">Send Message</button>
+                        <p id="form-status"></p>
+                    </form>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 Viktor Parisot</p>
+                <div><a href="#">Instagram</a><a href="#">LinkedIn</a></div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Detail View -->
+    <div class="project-detail-view">
+        <a href="#" class="close-project">&times;</a>
+        <div class="project-detail-content">
+            <div class="project-info">
+                <h2 id="projectTitle"></h2>
+                <div class="meta">
+                    <!-- Meta content will be generated by JS -->
+                </div>
+                <div class="description">
+                    <p id="projectDescription"></p>
+                </div>
+            </div>
+            <div class="project-media" id="projectGallery">
+                <!-- Gallery images will be generated by JS -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // === START: UPDATED projectsData WITH UNIQUE CAPTIONS ===
+        const projectsData = [
+            { id: 0, title: "Project 1", category: "Work in Progress", img: "https://i.postimg.cc/fL46JB7D/WIPweb.png", description: "This project is currently being updated.", client: "Stock Client", year: "2025", longDescription: "This project is a work in progress and will be updated soon with detailed information, case studies, and final visuals. Thank you for your patience.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/fL46JB7D/WIPweb.png", caption: "Project placeholder image." }
+                ] 
+            },
+            { id: 1, title: "FlareSightX Logo Creation", category: "Logo Design", img: "https://i.postimg.cc/Kj9nhcm1/FTypeApp.png", description: "Logo for a proof-of-concept crypto trading platform.", client: "Proof of concept", year: "2025", longDescription: "FlareSightX is a proof-of-concept crypto trading platform engineered for high-volume performance. Built around cold-wallet architecture and advanced security layers, it ensures maximum asset protection, faster transactions, and seamless scalability for institutions and professional traders seeking efficient, secure digital asset management.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/Kj9nhcm1/FTypeApp.png", caption: "The primary logo design, presented in its standard color scheme on a clean background to emphasize its form." },
+                    { url: "https://i.postimg.cc/dVzrzTZz/ftype-Orange.png", caption: "A vibrant, alternative color version of the logo, demonstrating its adaptability across different brand applications." },
+                    { url: "https://i.postimg.cc/ydVd5FBX/Flare-Sight-Xevent.png", caption: "Mockup of the logo on event branding materials, showing its practical application in a real-world context." }
+                ] 
+            },
+            { id: 2, title: "Project 2", category: "Work in Progress", img: "https://i.postimg.cc/fL46JB7D/WIPweb.png", description: "This project is currently being updated.", client: "Stock Client", year: "2025", longDescription: "This project is a work in progress and will be updated soon with detailed information, case studies, and final visuals. Thank you for your patience.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/fL46JB7D/WIPweb.png", caption: "Project placeholder image." }
+                ] 
+            },
+            { id: 3, title: "Project 3", category: "Work in Progress", img: "https://i.postimg.cc/fL46JB7D/WIPweb.png", description: "This project is currently being updated.", client: "Stock Client", year: "2025", longDescription: "This project is a work in progress and will be updated soon with detailed information, case studies, and final visuals. Thank you for your patience.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/fL46JB7D/WIPweb.png", caption: "Project placeholder image." }
+                ] 
+            },
+            { id: 5, title: "LuftWerk Rebranding", category: "Logo Design", img: "https://i.postimg.cc/j28zYqRj/Luftwerk-Paper.png", description: "Logo redesign for an innovative German AI-driven AVAC systems company.", client: "PoC", year: "2024", longDescription: "LuftWerk, a German proof-of-concept company developing AVAC systems, created Coreva One, an AI-driven prototype that cuts energy use by up to 30% while improving safety and productivity. This project focused on redesigning their logo to reflect their innovation and growth in the AI space.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/j28zYqRj/Luftwerk-Paper.png", caption: "The final logo presented on textured paper to give a sense of official branding and tangibility." },
+                    { url: "https://i.postimg.cc/Y9xLWBmN/Red.png", caption: "Exploring the logo's impact using a bold, single-color application, highlighting its strong silhouette." },
+                    { url: "https://i.postimg.cc/BQxjYvGp/Luft-Werk-Helmet.png", caption: "A mockup demonstrating the logo's placement on industrial equipment, ensuring visibility and brand recognition." }
+                ] 
+            },
+            { id: 6, title: "Project 4", category: "Work in Progress", img: "https://i.postimg.cc/fL46JB7D/WIPweb.png", description: "This project is currently being updated.", client: "Stock Client", year: "2025", longDescription: "This project is a work in progress and will be updated soon with detailed information, case studies, and final visuals. Thank you for your patience.", 
+                galleryImages: [
+                    { url: "https://i.postimg.cc/fL46JB7D/WIPweb.png", caption: "Project placeholder image." }
+                ] 
+            }
+        ];
+        // === END: UPDATED projectsData WITH UNIQUE CAPTIONS ===
+
+        const body = document.body;
+
+        // --- Header Scroll Animation ---
+        const header = document.querySelector('.main-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // --- Experience Timeline Accordion ---
+        const timelineItems = document.querySelectorAll('.experience-timeline .timeline-item');
+        timelineItems.forEach(item => {
+            const header = item.querySelector('.timeline-header');
+            header.addEventListener('click', () => {
+                const isActive = item.classList.contains('active');
+                timelineItems.forEach(i => i.classList.remove('active'));
+                if (!isActive) {
+                    item.classList.add('active');
+                }
+            });
+        });
+        
+        // --- START: CORRECTED EmailJS Contact Form Script ---
+        (function() {
+            emailjs.init({ publicKey: "ABQevUjBd2Pcnultd" });
+        })();
+
+        const contactForm = document.getElementById('contact-form');
+        const statusMessage = document.getElementById('form-status');
+        const submitButton = contactForm.querySelector('.submit-btn');
+
+        contactForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+
+            const templateParams = {
+                user_name: document.getElementById('user_name').value,
+                user_email: document.getElementById('user_email').value,
+                message: document.getElementById('message').value
+            };
+
+            emailjs.send('service_rg06914', 'template_drvuhar', templateParams)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    statusMessage.textContent = 'Message sent successfully!';
+                    statusMessage.style.color = '#4CAF50';
+                    contactForm.reset();
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    statusMessage.textContent = 'Failed to send message. Please try again.';
+                    statusMessage.style.color = '#F44336';
+                })
+                .finally(function() {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Send Message';
+                    setTimeout(() => {
+                        statusMessage.textContent = '';
+                    }, 5000);
+                });
+        });
+        // --- END: CORRECTED EmailJS Contact Form Script ---
+
+        // --- Hero Slideshow ---
+        const bgContainer = document.getElementById('hero-bg-container');
+        const infoContainer = document.getElementById('hero-project-info-container');
+        let currentProjectIndex = 0;
+
+        projectsData.forEach((project, index) => {
+            const bgDiv = document.createElement('div');
+            bgDiv.className = 'hero-background';
+            bgDiv.style.backgroundImage = `url(${project.img})`;
+            bgDiv.dataset.index = index;
+            bgContainer.appendChild(bgDiv);
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'hero-project-info';
+            infoDiv.dataset.index = index;
+            infoDiv.innerHTML = `<a href="#" class="portfolio-item-trigger" data-project-id="${project.id}"><h3>${project.title}</h3><p>${project.description}</p></a>`;
+            infoContainer.appendChild(infoDiv);
+        });
+
+        function showProject(index) {
+            document.querySelectorAll('.hero-background').forEach(div => div.classList.remove('active'));
+            document.querySelector(`.hero-background[data-index='${index}']`).classList.add('active');
+            document.querySelectorAll('.hero-project-info').forEach(div => div.classList.remove('active'));
+            document.querySelector(`.hero-project-info[data-index='${index}']`).classList.add('active');
+        }
+
+        function nextProject() {
+            currentProjectIndex = (currentProjectIndex + 1) % projectsData.length;
+            showProject(currentProjectIndex);
+        }
+
+        showProject(0);
+        setInterval(nextProject, 7000);
+        
+        // --- Interactive Tagline ---
+        const verbs = ["Design", "Model", "Brand", "Craft", "Visualize", "Illustrate", "Render", "Conceptualize", "Create", "Innovate", "Shape", "Build", "Develop", "Transform"];
+        const verbWrapper = document.querySelector('.verb-wrapper');
+        const verbEl = document.querySelector('.verb');
+        let verbIndex = 0;
+        const hiddenSpan = document.createElement('span');
+        hiddenSpan.style.visibility = 'hidden';
+        hiddenSpan.style.position = 'absolute';
+        hiddenSpan.style.pointerEvents = 'none';
+        hiddenSpan.style.top = '-9999px'; 
+        hiddenSpan.style.left = '-9999px';
+        hiddenSpan.style.font = window.getComputedStyle(verbEl).font;
+        document.body.appendChild(hiddenSpan);
+
+        function updateVerb() {
+            verbIndex = (verbIndex + 1) % verbs.length;
+            const newVerb = verbs[verbIndex];
+            verbEl.classList.remove('active');
+            setTimeout(() => {
+                hiddenSpan.textContent = newVerb;
+                const newWidth = hiddenSpan.offsetWidth;
+                verbWrapper.style.width = newWidth + 'px';
+                verbEl.textContent = newVerb;
+                verbEl.classList.add('active');
+            }, 400);
+        }
+        hiddenSpan.textContent = verbEl.textContent;
+        verbWrapper.style.width = hiddenSpan.offsetWidth + 'px';
+        setInterval(updateVerb, 2500);
+
+        // --- Scroll-triggered Animations ---
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // --- START: OBSERVE NEW AND EXISTING SECTIONS ---
+        document.querySelectorAll('.scrolling-gallery-section .portfolio-item, .intro-statement-section').forEach(el => observer.observe(el));
+        // --- END: OBSERVE NEW AND EXISTING SECTIONS ---
+
+
+        // --- Arrow Navigation for Scrolling Gallery ---
+        const slider = document.querySelector('.portfolio-gallery-wrapper');
+        const leftArrow = document.querySelector('.scroll-arrow.left');
+        const rightArrow = document.querySelector('.scroll-arrow.right');
+        
+        const scrollByTwo = () => {
+            const itemWidth = 500; // From CSS
+            const gap = 80; // From CSS
+            const scrollAmount = (itemWidth * 2) + gap;
+            return scrollAmount;
+        };
+
+        leftArrow.addEventListener('click', () => {
+            slider.scrollBy({ left: -scrollByTwo(), behavior: 'smooth' });
+        });
+        rightArrow.addEventListener('click', () => {
+            slider.scrollBy({ left: scrollByTwo(), behavior: 'smooth' });
+        });
+
+        // --- Seamless Brand Carousel ---
+        const track = document.querySelector('.brand-track');
+        Array.from(track.children).forEach(brand => track.appendChild(brand.cloneNode(true)));
+        
+        // --- Project Detail View ---
+        const detailView = document.querySelector('.project-detail-view');
+        const closeBtn = document.querySelector('.close-project');
+
+        // === START: REVISED openDetailView FUNCTION ===
+        function openDetailView(projectId) {
+            const project = projectsData.find(p => p.id == projectId);
+            if (!project) return;
+
+            // Populate Title and Description
+            document.getElementById('projectTitle').textContent = project.title;
+            document.getElementById('projectDescription').textContent = project.longDescription;
+            
+            // Populate Meta Pills
+            const metaContainer = detailView.querySelector('.meta');
+            metaContainer.innerHTML = ''; // Clear previous pills
+
+            const categoryPill = document.createElement('p');
+            categoryPill.innerHTML = `<span>Category: </span>${project.category}`;
+            metaContainer.appendChild(categoryPill);
+
+            const clientPill = document.createElement('p');
+            clientPill.innerHTML = `<span>Client: </span>${project.client}`;
+            metaContainer.appendChild(clientPill);
+
+            const yearPill = document.createElement('p');
+            yearPill.innerHTML = `<span>Year: </span>${project.year}`;
+            metaContainer.appendChild(yearPill);
+
+            // Populate Gallery with Images and Captions
+            const projectGallery = document.getElementById('projectGallery');
+            projectGallery.innerHTML = ''; // Clear previous images
+            project.galleryImages.forEach((imageObject) => {
+                const figure = document.createElement('figure');
+                const img = document.createElement('img');
+                img.src = imageObject.url; 
+                img.alt = project.title;
+                
+                const figcaption = document.createElement('figcaption');
+                figcaption.textContent = imageObject.caption;
+
+                figure.appendChild(img);
+                figure.appendChild(figcaption);
+                projectGallery.appendChild(figure);
+            });
+            
+            body.style.overflow = 'hidden';
+            detailView.classList.add('active');
+            detailView.scrollTop = 0;
+        }
+        // === END: REVISED openDetailView FUNCTION ===
+
+        function closeDetailView() {
+            body.style.overflow = 'auto';
+            detailView.classList.remove('active');
+        }
+
+        document.addEventListener('click', (e) => {
+            const trigger = e.target.closest('.portfolio-item, .portfolio-item-trigger');
+            if (trigger) {
+                e.preventDefault();
+                const projectId = trigger.dataset.projectId;
+                openDetailView(projectId);
+            }
+        });
+
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            closeDetailView();
+        });
+
+        detailView.addEventListener('click', (e) => {
+            if (e.target === detailView) { closeDetailView(); }
+        });
+    });
+    </script>
+</body>
+</html>
